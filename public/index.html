@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gift Lists</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b08;--side:#0d140f;--card:#111a14;--ink:#eaf5ee;--mute:#8fa597;--line:#203227;--g:#2ee66b;--gd:#0c3a1d;--warn:#ff6b6b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.45}
+.app{display:grid;grid-template-columns:230px 1fr;max-width:980px;margin:0 auto;min-height:100vh}
+aside{background:var(--side);border-right:1px solid var(--line);padding:28px 14px}
+aside h2{font-size:1rem;margin:0 8px 12px;color:var(--mute);font-weight:600}
+.cat{display:flex;justify-content:space-between;width:100%;background:none;color:var(--ink);text-align:left;padding:10px 12px;border-radius:10px;margin-bottom:2px;border:0;font:inherit;cursor:pointer}
+.cat:hover{background:var(--card)}
+.cat.on{background:var(--g);color:#04210f;font-weight:700}
+.cat small{opacity:.75}
+main{padding:28px 18px 60px;min-width:0}
+h1{font-size:2.2rem;font-weight:800;margin:0 0 4px;letter-spacing:-.02em;color:var(--g)}
+.sub{color:var(--mute);margin:0 0 20px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,.cat:focus-visible,label.photo:focus-within{outline:3px solid var(--g);outline-offset:2px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;font-weight:600}
+.primary{background:var(--g);color:#04210f}
+.ghost{background:none;color:var(--mute);padding:6px 10px}
+.ghost:hover{color:var(--warn)}
+.add-person input[type=text]{flex:1 1 140px}
+.add-person input.num{flex:0 1 110px}
+.person{background:var(--card);border-radius:16px;margin-top:18px;overflow:hidden;border:1px solid var(--line)}
+.person>header{padding:16px 18px 12px;border-top:6px solid var(--g);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.person h3{margin:0;font-size:1.35rem}
+.tag{display:inline-block;background:var(--gd);color:var(--g);border-radius:20px;padding:1px 10px;font-size:.82rem;margin-left:8px;font-weight:600;vertical-align:middle}
+.meta{color:var(--mute);font-size:.92rem}
+.over{color:var(--warn);font-weight:600}
+.bar{height:6px;background:var(--line);margin:0 18px 8px;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--g)}
+.bar i.over{background:var(--warn)}
+ul{list-style:none;margin:0;padding:0 18px}
+li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+li input[type=checkbox]{width:22px;height:22px;accent-color:var(--g);flex:none}
+li img{width:48px;height:48px;object-fit:cover;border-radius:8px;flex:none}
+li .name{flex:1;overflow-wrap:anywhere}
+li.done .name{text-decoration:line-through;color:var(--mute)}
+li .price{color:var(--mute);font-variant-numeric:tabular-nums}
+li .name a{color:var(--g);font-size:.88rem;margin-left:8px;white-space:nowrap}
+.add-gift{padding:12px 18px 16px;border-top:1px solid var(--line)}
+.add-gift input[type=text]{flex:1 1 140px}
+.add-gift input.num{flex:0 1 90px}
+label.photo{background:var(--gd);color:var(--g);border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+.empty{text-align:center;color:var(--mute);padding:40px 10px;border:2px dashed var(--line);border-radius:16px;margin-top:18px}
+.summary{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.summary div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px}
+.summary b{display:block;font-size:1.4rem;color:var(--g)}
+.summary span{color:var(--mute);font-size:.88rem}
+@media (max-width:700px){
+ .app{grid-template-columns:1fr}
+ aside{border-right:0;border-bottom:1px solid var(--line);padding:14px 12px;display:flex;gap:6px;overflow-x:auto}
+ aside h2{display:none}
+ .cat{width:auto;white-space:nowrap;gap:8px;margin:0;flex:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside id="side" aria-label="Categories"></aside>
+<main>
+  <h1>Gift lists</h1>
+  <p class="sub">Pick a category, add a person, then list gift ideas with links and photos.</p>
+  <div class="summary" id="summary"></div>
+  <div class="row add-person">
+    <input type="text" id="pname" placeholder="Person’s name" aria-label="Person’s name" maxlength="40">
+    <select id="pcat" aria-label="Category"></select>
+    <input id="pbudget" class="num" type="number" min="0" inputmode="decimal" placeholder="Budget $" aria-label="Budget in dollars">
+    <button class="primary" id="addPerson">Add person</button>
+  </div>
+  <div id="list"></div>
+</main>
+</div>
+<script>
+var KEY="giftlists-v1",CATS=["Child","Partner","Parent","Friend","Coworker","Other"],LABEL={Child:"Gifts for your child",Partner:"Gifts for your partner",Parent:"Gifts for a parent",Friend:"Gifts for a friend",Coworker:"Gifts for a coworker",Other:"Other gifts"};
+var data=[],filter="All";
+try{var s=localStorage.getItem(KEY);if(s)data=JSON.parse(s)||[];}catch(e){data=[];}
+data.forEach(function(p){if(!p.cat)p.cat="Other";});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function money(n){return "$"+(Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2});}
+function esc(t){var d=document.createElement("div");d.textContent=t;return d.innerHTML.replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function normUrl(v){v=(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{var u=new URL(v);return /^https?:$/.test(u.protocol)&&u.hostname.indexOf(".")>0?u.href:null;}catch(e){return null;}}
+function host(u){try{return new URL(u).hostname.replace(/^www\./,"");}catch(e){return "link";}}
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,160/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.7));};im.onerror=function(){cb("");};im.src=r.result;};r.onerror=function(){cb("");};r.readAsDataURL(file);}
+function renderSide(){
+  var h='<h2>Categories</h2><button class="cat'+(filter==="All"?' on':'')+'" data-c="All">All lists <small>'+data.length+'</small></button>';
+  CATS.forEach(function(c){var n=data.filter(function(p){return p.cat===c;}).length;h+='<button class="cat'+(filter===c?' on':'')+'" data-c="'+c+'">'+LABEL[c]+' <small>'+n+'</small></button>';});
+  document.getElementById("side").innerHTML=h;
+  var sel=document.getElementById("pcat"),cur=sel.value;
+  sel.innerHTML=CATS.map(function(c){return '<option value="'+c+'">'+LABEL[c]+'</option>';}).join('');
+  sel.value=filter!=="All"?filter:(cur||"Other");
+}
+function render(){
+  renderSide();
+  var shown=data.filter(function(p){return filter==="All"||p.cat===filter;});
+  var tp=0,cnt=0,got=0;
+  shown.forEach(function(p){p.gifts.forEach(function(g){tp+=g.price;cnt++;if(g.done)got++;});});
+  document.getElementById("summary").innerHTML=shown.length?
+    '<div><b>'+shown.length+'</b><span>'+(shown.length===1?'person':'people')+'</span></div><div><b>'+got+' of '+cnt+'</b><span>gifts bought</span></div><div><b>'+money(tp)+'</b><span>planned spend</span></div>':'';
+  var el=document.getElementById("list");
+  if(!shown.length){el.innerHTML='<div class="empty">'+(filter==="All"?'No lists yet. Add a name above to start your first one.':'No lists in “'+esc(LABEL[filter])+'” yet. Add a name above.')+'</div>';return;}
+  el.innerHTML=shown.map(function(p){
+    var spent=p.gifts.reduce(function(a,g){return a+g.price;},0);
+    var over=p.budget>0&&spent>p.budget;
+    var pct=p.budget>0?Math.min(100,spent/p.budget*100):0;
+    return '<section class="person" data-p="'+p.id+'"><header><div><h3>'+esc(p.name)+'<span class="tag">'+esc(p.cat)+'</span></h3><div class="meta">'+
+      (p.budget>0?'<span class="'+(over?'over':'')+'">'+money(spent)+' of '+money(p.budget)+'</span>'+(over?' — over budget':''):money(spent)+' planned')+
+      '</div></div><button class="ghost" data-act="delP" aria-label="Delete '+esc(p.name)+'’s list">Delete list</button></header>'+
+      (p.budget>0?'<div class="bar"><i class="'+(over?'over':'')+'" style="width:'+pct+'%"></i></div>':'')+
+      '<ul>'+p.gifts.map(function(g){return '<li class="'+(g.done?'done':'')+'" data-g="'+g.id+'"><input type="checkbox" data-act="tog" '+(g.done?'checked':'')+' aria-label="Bought">'+(g.img?'<img src="'+esc(g.img)+'" alt="" referrerpolicy="no-referrer">':'')+'<span class="name">'+esc(g.name)+(g.url?'<a href="'+esc(g.url)+'" target="_blank" rel="noopener noreferrer">'+esc(host(g.url))+'</a>':'')+'</span><span class="price">'+(g.price?money(g.price):'')+'</span><button class="ghost" data-act="delG" aria-label="Remove '+esc(g.name)+'">Remove</button></li>';}).join('')+'</ul>'+
+      '<div class="add-gift row"><input type="text" placeholder="Gift idea" aria-label="Gift idea" maxlength="80"><input type="text" inputmode="url" placeholder="Link (optional)" aria-label="Link to the gift" maxlength="500"><input class="num" type="number" min="0" inputmode="decimal" placeholder="Price $" aria-label="Price in dollars"><label class="photo"><span>Add photo</span><input type="file" accept="image/*" hidden></label><button class="primary" data-act="addG">Add gift</button></div></section>';
+  }).join('');
+}
+function addPerson(){
+  var n=document.getElementById("pname"),b=document.getElementById("pbudget");
+  if(!n.value.trim()){n.focus();return;}
+  data.push({id:uid(),name:n.value.trim(),cat:document.getElementById("pcat").value,budget:parseFloat(b.value)||0,gifts:[]});
+  n.value="";b.value="";save();render();n.focus();
+}
+document.getElementById("addPerson").onclick=addPerson;
+document.getElementById("pname").onkeydown=function(e){if(e.key==="Enter")addPerson();};
+document.getElementById("side").addEventListener("click",function(e){var b=e.target.closest(".cat");if(b){filter=b.dataset.c;render();}});
+var pending={};
+function autofill(inp){
+  var url=normUrl(inp.value);if(!url)return;
+  var sec=inp.closest(".person"),box=inp.closest(".add-gift"),ins=box.querySelectorAll("input"),lab=box.querySelector("label.photo span");
+  lab.textContent="Scanning link…";
+  fetch("/api/preview?url="+encodeURIComponent(url)).then(function(r){return r.json();}).then(function(d){
+    if(d.title&&!ins[0].value.trim())ins[0].value=d.title.slice(0,80);
+    if(d.price&&!ins[2].value)ins[2].value=d.price;
+    if(d.image)pending[sec.dataset.p]=d.image;
+    lab.textContent=d.image?"Image found":"Add photo";
+  }).catch(function(){lab.textContent="Add photo";});
+}
+document.getElementById("list").addEventListener("change",function(e){
+  if(e.target.getAttribute("inputmode")==="url"){autofill(e.target);return;}
+  if(e.target.type!=="file"||!e.target.files[0])return;
+  var sec=e.target.closest(".person"),lab=e.target.parentNode.firstChild;
+  lab.textContent="Adding…";
+  shrink(e.target.files[0],function(d){pending[sec.dataset.p]=d;lab.textContent=d?"Photo added":"Photo failed";});
+});
+document.getElementById("list").addEventListener("click",function(e){
+  var act=e.target.getAttribute("data-act");if(!act)return;
+  var sec=e.target.closest(".person"),p=data.find(function(x){return x.id===sec.dataset.p;});
+  if(act==="delP"){data=data.filter(function(x){return x!==p;});}
+  else if(act==="addG"){
+    var ins=sec.querySelectorAll(".add-gift input");
+    if(!ins[0].value.trim()){ins[0].focus();return;}
+    var url=normUrl(ins[1].value);if(url===null){ins[1].focus();ins[1].style.borderColor="var(--warn)";return;}
+    p.gifts.push({id:uid(),name:ins[0].value.trim(),url:url,price:parseFloat(ins[2].value)||0,img:pending[p.id]||"",done:false});
+    delete pending[p.id];
+  }else{
+    var li=e.target.closest("li"),g=p.gifts.find(function(x){return x.id===li.dataset.g;});
+    if(act==="tog")g.done=e.target.checked;
+    if(act==="delG")p.gifts=p.gifts.filter(function(x){return x!==g;});
+  }
+  save();render();
+  if(act==="addG"){var s2=document.querySelector('[data-p="'+p.id+'"] .add-gift input');if(s2)s2.focus();}
+});
+document.getElementById("list").addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&e.target.closest(".add-gift")&&e.target.type!=="file"){e.target.closest(".add-gift").querySelector('[data-act="addG"]').click();}
+});
+render();
+</script>
+</body>
+</html>
